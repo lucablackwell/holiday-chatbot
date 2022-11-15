@@ -19,26 +19,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
-        'password',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * A user can have many messages
      *
-     * @var array<int, string>
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
 }
