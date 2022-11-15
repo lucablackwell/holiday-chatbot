@@ -1,0 +1,94 @@
+version: "3.5"
+
+services:
+  console:
+    build:
+      context: ./containers/
+      dockerfile: ./console/Dockerfile 
+      args:
+        NODEVERSION: 16
+    container_name: ${APPNAME:?err}-console
+    environment:
+      - APPNAME
+      - APPNAMELONG
+      - WILDCARDCERT
+      - WWWDOMAIN
+      - HTACCESS
+      - HTUSER
+      - HTPASS
+      - ENVSET
+      - HOSTUID
+      - HOSTGID
+      - NODEVERSION
+      - DATABASENAME
+      - DATABASEUSER
+    volumes:
+      - ./storage/app:/storage/app
+      - ./storage/database:/storage/database
+      - ./storage/certs:/storage/certs
+    
+  web:
+    build:
+      context: ./containers/
+      dockerfile: ./web/Dockerfile 
+    ports:
+      - "${BINDHTTP}"
+      - "${BINDHTTPS}"
+    container_name: ${APPNAME:?err}-web
+    environment:
+      - APPNAME
+      - APPNAMELONG
+      - WILDCARDCERT
+      - WWWDOMAIN
+      - HTACCESS
+      - HTUSER
+      - HTPASS
+      - ENVSET
+      - HOSTUID
+      - HOSTGID
+      - NODEVERSION
+      - DATABASENAME
+      - DATABASEUSER
+    volumes:
+      - ./storage/app:/storage/app
+      - ./storage/certs:/storage/certs
+      - ./storage/app:/var/www/html
+      - ./storage/logs/nginx:/var/log/nginx
+    depends_on:
+      - console
+
+  redis:
+    build:
+      context: ./containers/
+      dockerfile: ./redis/Dockerfile 
+    ports:
+      - "${BINDREDIS}"
+    container_name: ${APPNAME:?err}-redis
+    environment:
+      - ENVSET
+      - HOSTUID
+      - HOSTGID
+
+  db:
+    build:
+      context: ./containers/
+      dockerfile: ./mysql/Dockerfile 
+    ports:
+      - "${BINDMYSQL}"
+    container_name: ${APPNAME:?err}-db
+    environment:
+      - ENVSET
+      - HOSTUID
+      - HOSTGID
+      - DATABASENAME
+      - DATABASEUSER
+    volumes:
+      - ./storage/database:/mysql
+  
+  maildev:
+    container_name: ${APPNAME:?err}_maildev
+    image: maildev/maildev
+    ports:
+      - "1080:80"
+
+

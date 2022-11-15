@@ -1,0 +1,12 @@
+#!/bin/bash
+#echo "** $HOSTDEF"
+#if [ -z "$HOSTDEF" ]; then
+#        echo "\$HOSTDEF not set; aborting."
+#        exit 1
+#fi
+
+echo "** NODEVERSION is ${NODEVERSION}"
+if [ -z "${NODEVERSION}" ]; then
+        echo "\${NODEVERSION} not set; aborting."
+        exit 1
+fi
