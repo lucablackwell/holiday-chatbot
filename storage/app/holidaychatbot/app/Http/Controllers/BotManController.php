@@ -71,12 +71,42 @@ class BotManController extends Controller
                 $countries = ['AFGHANISTAN', 'ALBANIA', 'ALGERIA', 'ANDORRA', 'ANGOLA', 'ANTIGUA & DEPS', 'ARGENTINA', 'ARMENIA', 'AUSTRALIA', 'AUSTRIA', 'AZERBAIJAN', 'BAHAMAS', 'BAHRAIN', 'BANGLADESH', 'BARBADOS', 'BELARUS', 'BELGIUM', 'BELIZE', 'BENIN', 'BHUTAN', 'BOLIVIA', 'BOSNIA HERZEGOVINA', 'BOTSWANA', 'BRAZIL', 'BRUNEI', 'BULGARIA', 'BURKINA', 'BURUNDI', 'CAMBODIA', 'CAMEROON', 'CANADA', 'CAPE VERDE', 'CENTRAL AFRICAN REP', 'CHAD', 'CHILE', 'CHINA', 'COLOMBIA', 'COMOROS', 'CONGO', 'COSTA RICA', 'CROATIA', 'CUBA', 'CYPRUS', 'CZECH REPUBLIC', 'DENMARK', 'DJIBOUTI', 'DOMINICA', 'DOMINICAN REPUBLIC', 'EAST TIMOR', 'ECUADOR', 'EGYPT', 'EL SALVADOR', 'EQUATORIAL GUINEA', 'ERITREA', 'ESTONIA', 'ETHIOPIA', 'FIJI', 'FINLAND', 'FRANCE', 'FRENCH POLYNESIA', 'GABON', 'GAMBIA', 'GEORGIA', 'GERMANY', 'GHANA', 'GREECE', 'GRENADA', 'GUATEMALA', 'GUINEA', 'GUINEA-BISSAU', 'GUYANA', 'HAITI', 'HONDURAS', 'HUNGARY', 'ICELAND', 'INDIA', 'INDONESIA', 'IRAN', 'IRAQ', 'IRELAND {REPUBLIC}', 'ISRAEL', 'ITALY', 'IVORY COAST', 'JAMAICA', 'JAPAN', 'JORDAN', 'KAZAKHSTAN', 'KENYA', 'KIRIBATI', 'KOREA NORTH', 'KOREA SOUTH', 'KOSOVO', 'KUWAIT', 'KYRGYZSTAN', 'LAOS', 'LATVIA', 'LEBANON', 'LESOTHO', 'LIBERIA', 'LIBYA', 'LIECHTENSTEIN', 'LITHUANIA', 'LUXEMBOURG', 'MACEDONIA', 'MADAGASCAR', 'MALAWI', 'MALAYSIA', 'MALDIVES', 'MALI', 'MALTA', 'MARSHALL ISLANDS', 'MAURITANIA', 'MAURITIUS', 'MEXICO', 'MICRONESIA', 'MOLDOVA', 'MONACO', 'MONGOLIA', 'MONTENEGRO', 'MOROCCO', 'MOZAMBIQUE', 'MYANMAR, {BURMA}', 'NAMIBIA', 'NAURU', 'NEPAL', 'NETHERLANDS', 'NEW ZEALAND', 'NICARAGUA', 'NIGER', 'NIGERIA', 'NORWAY', 'OMAN', 'PAKISTAN', 'PALAU', 'PANAMA', 'PAPUA NEW GUINEA', 'PARAGUAY', 'PERU', 'PHILIPPINES', 'POLAND', 'PORTUGAL', 'QATAR', 'ROMANIA', 'RUSSIAN FEDERATION', 'RWANDA', 'ST KITTS & NEVIS', 'ST LUCIA', 'SAINT VINCENT & THE GRENADINES', 'SAMOA', 'SAN MARINO', 'SAO TOME & PRINCIPE', 'SAUDI ARABIA', 'SENEGAL', 'SERBIA', 'SEYCHELLES', 'SIERRA LEONE', 'SINGAPORE', 'SLOVAKIA', 'SLOVENIA', 'SOLOMON ISLANDS', 'SOMALIA', 'SOUTH AFRICA', 'SOUTH SUDAN', 'SPAIN', 'SRI LANKA', 'SUDAN', 'SURINAME', 'SWAZILAND', 'SWEDEN', 'SWITZERLAND', 'SYRIA', 'TAIWAN', 'TAJIKISTAN', 'TANZANIA', 'THAILAND', 'TOGO', 'TONGA', 'TRINIDAD & TOBAGO', 'TUNISIA', 'TURKEY', 'TURKMENISTAN', 'TUVALU', 'UGANDA', 'UKRAINE', 'UNITED ARAB EMIRATES', 'UNITED KINGDOM', 'UNITED STATES', 'UNITED STATES OF AMERICA', 'USA', 'URUGUAY', 'UZBEKISTAN', 'VANUATU', 'VATICAN CITY', 'VENEZUELA', 'VIETNAM', 'YEMEN', 'ZAMBIA', 'ZIMBABWE'];
 
                 if (in_array($this->user_want['abroad']['country'], $countries)) {
+                    // abroad
                     $this->ask('Thank you. Do you want to go abroad? (y\n)', function(Answer $answer) {
-                        // abroad
                         $this->user_want['abroad']['want'] = ($answer->getText()[0] == 'y');
+                        // price
                         $this->ask('Thank you. What\'s your ideal price for one night?', function(Answer $answer) {
-                            // price
                             $this->user_want['price'] = $answer->getText();
+                            // location
+                            $this->ask('Thank you. What\'s your ideal location? (sea/city/mountain)', function(Answer $answer) {
+                                // location
+                                if (!in_array($answer->getText(), ['sea', 'city', 'mountain'])) {
+                                    $this->say('Invalid');
+                                    $this->end_while = (!in_array($answer->getText(), ['sea', 'city', 'mountain']));
+                                    while (!$this->end_while) {
+                                        $this->ask('Invalid. Enter again:', function(Answer $answer) {
+                                            $this->end_while = (!in_array($answer->getText(), ['sea', 'city', 'mountain']));
+                                        });
+                                    }
+                                }
+                                $this->user_want['location'] = $answer->getText();
+                                $this->ask('Thank you. How many stars would you like your destination to have (minimum)?', function(Answer $answer) {
+                                    // stars
+                                    $this->user_want['stars'] = $answer->getText();
+                                    $this->ask('Thank you. What\'s your ideal temperature? (cold/mild/hot)?', function(Answer $answer) {
+                                        // temperature
+                                        $this->user_want['temperature']['ideal'] = $answer->getText();
+                                        if ($answer->getText() == 'mild') {
+                                            $this->ask('If not mild, would you rather be cold or hot?', function(Answer $answer) {
+                                                $this->user_want['temperature']['prefer'] = $answer->getText();
+                                            });
+                                        } else {
+                                            $this->user_want['temperature']['prefer'] = '';
+                                        }
+                                        var_dump($this->user_want);
+                                    });
+                                });
+                            });
                         });
                     });
                 } else {
