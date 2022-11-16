@@ -62,42 +62,42 @@ class BotManController extends Controller
      */
     public function conversation($botman)
     {
-        $botman->ask('Hello! What is your name?', function(Answer $answer) {
-            $this->user_name = $answer->getText();
-            $this->say('It\'s lovely to meet you, ' . $this->user_name . '. Let\'s find you a holiday!');
+        $botman->ask('Hello! What is your name?', function(Answer $answer, $botman) {
+            $botman->user_name = $answer->getText();
+            $botman->say('It\'s lovely to meet you, ' . $this->user_name . '. Let\'s find you a holiday!');
 
-            $this->ask('What country do you live in, ' . $this->user_name . '?', function(Answer $answer) {
+            $botman->ask('What country do you live in, ' . $this->user_name . '?', function(Answer $answer, $botman) {
                 $this->user_want['abroad']['country'] = strtoupper($answer->getText());
                 $countries = ['AFGHANISTAN', 'ALBANIA', 'ALGERIA', 'ANDORRA', 'ANGOLA', 'ANTIGUA & DEPS', 'ARGENTINA', 'ARMENIA', 'AUSTRALIA', 'AUSTRIA', 'AZERBAIJAN', 'BAHAMAS', 'BAHRAIN', 'BANGLADESH', 'BARBADOS', 'BELARUS', 'BELGIUM', 'BELIZE', 'BENIN', 'BHUTAN', 'BOLIVIA', 'BOSNIA HERZEGOVINA', 'BOTSWANA', 'BRAZIL', 'BRUNEI', 'BULGARIA', 'BURKINA', 'BURUNDI', 'CAMBODIA', 'CAMEROON', 'CANADA', 'CAPE VERDE', 'CENTRAL AFRICAN REP', 'CHAD', 'CHILE', 'CHINA', 'COLOMBIA', 'COMOROS', 'CONGO', 'COSTA RICA', 'CROATIA', 'CUBA', 'CYPRUS', 'CZECH REPUBLIC', 'DENMARK', 'DJIBOUTI', 'DOMINICA', 'DOMINICAN REPUBLIC', 'EAST TIMOR', 'ECUADOR', 'EGYPT', 'EL SALVADOR', 'EQUATORIAL GUINEA', 'ERITREA', 'ESTONIA', 'ETHIOPIA', 'FIJI', 'FINLAND', 'FRANCE', 'FRENCH POLYNESIA', 'GABON', 'GAMBIA', 'GEORGIA', 'GERMANY', 'GHANA', 'GREECE', 'GRENADA', 'GUATEMALA', 'GUINEA', 'GUINEA-BISSAU', 'GUYANA', 'HAITI', 'HONDURAS', 'HUNGARY', 'ICELAND', 'INDIA', 'INDONESIA', 'IRAN', 'IRAQ', 'IRELAND {REPUBLIC}', 'ISRAEL', 'ITALY', 'IVORY COAST', 'JAMAICA', 'JAPAN', 'JORDAN', 'KAZAKHSTAN', 'KENYA', 'KIRIBATI', 'KOREA NORTH', 'KOREA SOUTH', 'KOSOVO', 'KUWAIT', 'KYRGYZSTAN', 'LAOS', 'LATVIA', 'LEBANON', 'LESOTHO', 'LIBERIA', 'LIBYA', 'LIECHTENSTEIN', 'LITHUANIA', 'LUXEMBOURG', 'MACEDONIA', 'MADAGASCAR', 'MALAWI', 'MALAYSIA', 'MALDIVES', 'MALI', 'MALTA', 'MARSHALL ISLANDS', 'MAURITANIA', 'MAURITIUS', 'MEXICO', 'MICRONESIA', 'MOLDOVA', 'MONACO', 'MONGOLIA', 'MONTENEGRO', 'MOROCCO', 'MOZAMBIQUE', 'MYANMAR, {BURMA}', 'NAMIBIA', 'NAURU', 'NEPAL', 'NETHERLANDS', 'NEW ZEALAND', 'NICARAGUA', 'NIGER', 'NIGERIA', 'NORWAY', 'OMAN', 'PAKISTAN', 'PALAU', 'PANAMA', 'PAPUA NEW GUINEA', 'PARAGUAY', 'PERU', 'PHILIPPINES', 'POLAND', 'PORTUGAL', 'QATAR', 'ROMANIA', 'RUSSIAN FEDERATION', 'RWANDA', 'ST KITTS & NEVIS', 'ST LUCIA', 'SAINT VINCENT & THE GRENADINES', 'SAMOA', 'SAN MARINO', 'SAO TOME & PRINCIPE', 'SAUDI ARABIA', 'SENEGAL', 'SERBIA', 'SEYCHELLES', 'SIERRA LEONE', 'SINGAPORE', 'SLOVAKIA', 'SLOVENIA', 'SOLOMON ISLANDS', 'SOMALIA', 'SOUTH AFRICA', 'SOUTH SUDAN', 'SPAIN', 'SRI LANKA', 'SUDAN', 'SURINAME', 'SWAZILAND', 'SWEDEN', 'SWITZERLAND', 'SYRIA', 'TAIWAN', 'TAJIKISTAN', 'TANZANIA', 'THAILAND', 'TOGO', 'TONGA', 'TRINIDAD & TOBAGO', 'TUNISIA', 'TURKEY', 'TURKMENISTAN', 'TUVALU', 'UGANDA', 'UKRAINE', 'UNITED ARAB EMIRATES', 'UNITED KINGDOM', 'UNITED STATES', 'UNITED STATES OF AMERICA', 'USA', 'URUGUAY', 'UZBEKISTAN', 'VANUATU', 'VATICAN CITY', 'VENEZUELA', 'VIETNAM', 'YEMEN', 'ZAMBIA', 'ZIMBABWE'];
 
                 if (in_array($this->user_want['abroad']['country'], $countries)) {
                     // abroad
-                    $this->ask('Thank you. Do you want to go abroad? (y\n)', function(Answer $answer) {
+                    $botman->ask('Thank you. Do you want to go abroad? (y\n)', function(Answer $answer, $botman) {
                         $this->user_want['abroad']['want'] = ($answer->getText()[0] == 'y');
                         // price
-                        $this->ask('Thank you. What\'s your ideal price for one night?', function(Answer $answer) {
+                        $botman->ask('Thank you. What\'s your ideal price for one night?', function(Answer $answer, $botman) {
                             $this->user_want['price'] = $answer->getText();
                             // location
-                            $this->ask('Thank you. What\'s your ideal location? (sea/city/mountain)', function(Answer $answer) {
+                            $botman->ask('Thank you. What\'s your ideal location? (sea/city/mountain)', function(Answer $answer, $botman) {
                                 // location
                                 if (!in_array($answer->getText(), ['sea', 'city', 'mountain'])) {
-                                    $this->say('Invalid');
+                                    $botman->say('Invalid');
                                     $this->end_while = (!in_array($answer->getText(), ['sea', 'city', 'mountain']));
                                     while (!$this->end_while) {
-                                        $this->ask('Invalid. Enter again:', function(Answer $answer) {
+                                        $botman->ask('Invalid. Enter again:', function(Answer $answer, $botman) {
                                             $this->end_while = (!in_array($answer->getText(), ['sea', 'city', 'mountain']));
                                         });
                                     }
                                 }
                                 $this->user_want['location'] = $answer->getText();
-                                $this->ask('Thank you. How many stars would you like your destination to have (minimum)?', function(Answer $answer) {
+                                $botman->ask('Thank you. How many stars would you like your destination to have (minimum)?', function(Answer $answer, $botman) {
                                     // stars
                                     $this->user_want['stars'] = $answer->getText();
-                                    $this->ask('Thank you. What\'s your ideal temperature? (cold/mild/hot)?', function(Answer $answer) {
+                                    $botman->ask('Thank you. What\'s your ideal temperature? (cold/mild/hot)?', function(Answer $answer, $botman) {
                                         // temperature
                                         $this->user_want['temperature']['ideal'] = $answer->getText();
                                         if ($answer->getText() == 'mild') {
-                                            $this->ask('If not mild, would you rather be cold or hot?', function(Answer $answer) {
+                                            $botman->ask('If not mild, would you rather be cold or hot?', function(Answer $answer, $botman) {
                                                 $this->user_want['temperature']['prefer'] = $answer->getText();
                                             });
                                         } else {
@@ -118,9 +118,21 @@ class BotManController extends Controller
 //                    }
 //                    var_dump($i);
                     // Country is invalid - can't use while loop so ask user to refresh
-                    $this->say('I\'m sorry, but I don\'t know that country. Please check your spelling or choose the one closest, refresh and enter it again.');
+                    while (!in_array($this->user_want['abroad']['country'], $countries)) {
+                        $test = $this->askAgain($botman);
+                    }
+                    $botman->say('I\'m sorry, but I don\'t know that country. Please check your spelling or choose the one closest, refresh and enter it again.');
                 }
             });
+        });
+    }
+
+    public function askAgain($botman) {
+        return $botman->ask('Invalid. Enter again:', function(Answer $answer) {
+            return [
+                (!in_array($answer->getText(), ['sea', 'city', 'mountain'])),
+                $answer->getText()
+            ];
         });
     }
 
@@ -167,9 +179,7 @@ class BotManController extends Controller
             $price_quarter = $want_price / 4;
             $price_half = $want_price / 2;
 
-            if ($hol_price >= $want_price + $price_half) {
-                // half more
-            } elseif ($hol_price >= $want_price + $price_quarter) {
+            if ($hol_price >= $want_price + $price_quarter) {
                 // quarter more
                 $holiday['Weight'] = 1;
             } elseif ($hol_price < $want_price + $price_quarter && $hol_price >= $want_price - $price_quarter) {
@@ -218,30 +228,6 @@ class BotManController extends Controller
                 $holiday['Weight'] = $holiday['Weight'] + 1;
             } elseif ($hol_stars > $want_stars) {
                 $holiday['Weight'] = $holiday['Weight'] + 2;
-            }
-
-            // Temperature
-            // 0 - if opposite of ideal
-            // 1 - if mild and ideal or hotel mild
-            // 2 - if ideal
-            $hol_temp = $this->temperatureInt($holiday['TempRating']);
-            $want_temp = $this->temperatureInt($user_want['temperature']['ideal']);
-
-            if ($want_temp == 2) {
-                // ideal is mild
-                $want_preferred = $this->temperatureInt($user_want['temperature']['prefer']);
-                if ($hol_temp == $want_temp) {
-                    // hotel is mild
-                    $holiday['Weight'] = $holiday['Weight'] + 2;
-                } elseif ($hol_temp == $want_preferred) {
-                    // hotel is preferred after mild
-                    $holiday['Weight'] = $holiday['Weight'] + 1;
-                }
-            } elseif ($hol_temp == $want_temp) {
-                $holiday['Weight'] = $holiday['Weight'] + 2;
-            } elseif ($hol_temp == 2) {
-                // hotel is mild
-                $holiday['Weight'] = $holiday['Weight'] + 1;
             }
 
             // Activity - 1 max
