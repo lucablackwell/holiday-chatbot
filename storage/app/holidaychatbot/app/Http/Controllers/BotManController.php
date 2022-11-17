@@ -141,8 +141,98 @@ class BotManController extends Controller
                                                             $location_to_say . ' ' .
                                                             $abroad_to_say . ', in a hotel with ' .
                                                             $stars_to_say . ', that costs around ' .
-                                                            $this->user_want['price'] . ' a night.'
-                                                        );
+                                                            $this->user_want['price'] . ' a night.');
+
+
+                                                        // weight holidays
+                                                        $this->holidays = Holiday::all()->toArray();
+                                                        for ($holiday = 0; $holiday < count($this->holidays); $holiday++) {
+                                                            $this->holidays[$holiday]['Weight'] =  0;
+
+                                                            // Price - 4 max
+                                                            // 0 - half more
+                                                            // 1 - quarter more
+                                                            // 2 - around same
+                                                            // 3 - quarter less
+                                                            // 4 - half less
+                                                            $hol_price = $this->holidays[$holiday]['PricePerNight'];
+                                                            $want_price = $this->user_want['price'];
+                                                            $price_quarter = $want_price / 4;
+                                                            $price_half = $want_price / 2;
+
+                                                            if ($hol_price >= $want_price + $price_quarter) {
+                                                                // quarter more
+                                                                $this->holidays[$holiday]['Weight'] = 1;
+                                                            } elseif ($hol_price < $want_price + $price_quarter && $hol_price >= $want_price - $price_quarter) {
+                                                                // around same
+                                                                $this->holidays[$holiday]['Weight'] = 2;
+                                                            } elseif ($hol_price < $want_price - $price_quarter && $hol_price >= $want_price - $price_half) {
+                                                                // quarter less
+                                                                $this->holidays[$holiday]['Weight'] = 3;
+                                                            } elseif ($hol_price < $want_price - $price_half) {
+                                                                // half less
+                                                                $this->holidays[$holiday]['Weight'] = 4;
+                                                            }
+
+
+                                                            // Abroad - 2 max
+                                                            // 0 - is not what user wants
+                                                            // 2 - is what user wants
+                                                            $local = $this->holidays[$holiday]['Country'] == $this->user_want['abroad']['country'];
+
+                                                            if ($local == $this->user_want['abroad']['want']) {
+                                                                // hotel is local and user wants to be local OR
+                                                                // hotel is abroad and user wants to be abroad
+                                                                $this->holidays[$holiday]['Weight'] =  $this->holidays[$holiday]['Weight'] + 2;
+                                                            }
+
+                                                            // Location - 2 max
+                                                            // 0 - is not what user wants
+                                                            // 2 - is what user wants
+                                                            if ($this->holidays[$holiday]['Location'] == $this->user_want['location']) {
+                                                                $this->holidays[$holiday]['Weight'] = $this->holidays[$holiday]['Weight'] + 2;
+                                                            }
+
+
+                                                            // Stars - 2 max
+                                                            // 0 - lower than minimum wanted
+                                                            // 1 - is minimum wanted
+                                                            // 2 - higher than minimum wanted
+                                                            $hol_stars = $this->holidays[$holiday]['StarRating'];
+                                                            $want_stars = $this->user_want['stars'];
+
+                                                            if ($want_stars == 5 && $hol_stars == 5) {
+                                                                $this->holidays[$holiday]['Weight'] = $this->holidays[$holiday]['Weight'] + 2;
+                                                            }
+
+                                                            if ($hol_stars == $want_stars) {
+                                                                $this->holidays[$holiday]['Weight'] = $this->holidays[$holiday]['Weight'] + 1;
+                                                            } elseif ($hol_stars > $want_stars) {
+                                                                $this->holidays[$holiday]['Weight'] = $this->holidays[$holiday]['Weight'] + 2;
+                                                            }
+
+                                                            // Activity - 1 max
+                                                            // 1 - is what user wants
+                                                            if ($this->holidays[$holiday]['Activity'] == $this->user_want['activity']) {
+                                                                $this->holidays[$holiday]['Weight'] = $this->holidays[$holiday]['Weight'] + 1;
+                                                            }
+                                                        }
+
+                                                        // rank by weight, then price, then stars
+                                                        usort($this->holidays, function ($hol1, $hol2) {
+                                                            if ($hol1['Weight'] == $hol2['Weight']) {
+                                                                // weights are the same
+                                                                if ($hol1['PricePerNight'] == $hol2['PricePerNight']) {
+                                                                    // prices are the same
+                                                                    return $hol2['StarRating'] <=> $hol1['StarRating'];
+                                                                } else {
+                                                                    return $hol1['PricePerNight'] <=> $hol2['PricePerNight'];
+                                                                }
+                                                            } else {
+                                                                return $hol2['Weight'] <=> $hol1['Weight'];
+                                                            }
+                                                        });
+                                                        var_dump($this->holidays);
                                                     }
                                                 });
                                             }
@@ -167,18 +257,18 @@ class BotManController extends Controller
     }
 
     function showHoliday($holiday, $botman) {
-        echo "Name: " . $holiday['HotelName'] . "\n";
-        echo "PPN: " . $holiday['PricePerNight'] . "\n";
-        echo "Located: " . $holiday['City'] . ", " . $holiday['Country'] . ", " . $holiday['Continent'] . "\n";
-        echo "Surroundings: " . $holiday['Location'] . "\n";
+        echo "Name: " . $this->holidays[$holiday]['HotelName'] . "\n";
+        echo "PPN: " . $this->holidays[$holiday]['PricePerNight'] . "\n";
+        echo "Located: " . $this->holidays[$holiday]['City'] . ", " . $this->holidays[$holiday]['Country'] . ", " . $this->holidays[$holiday]['Continent'] . "\n";
+        echo "Surroundings: " . $this->holidays[$holiday]['Location'] . "\n";
         $stars = '';
-        for ($i = 0; $i < $holiday['StarRating']; $i++) {
+        for ($i = 0; $i < $this->holidays[$holiday]['StarRating']; $i++) {
             $stars .= '★';
         }
         echo "Stars: " . $stars . "\n";
-        echo "Temperature: " . $holiday['TempRating'] . "\n";
-        echo "Activity: " . $holiday['Category'] . "\n";
-        echo $holiday['Weight'] . "\n\n";
+        echo "Temperature: " . $this->holidays[$holiday]['TempRating'] . "\n";
+        echo "Activity: " . $this->holidays[$holiday]['Activity'] . "\n";
+        echo $this->holidays[$holiday]['Weight'] . "\n\n";
 
     }
 
@@ -193,83 +283,6 @@ class BotManController extends Controller
         }
     }
 
-    function weightHolidays($holidays, $user_want) {
-        $to_return = [];
-        foreach ($holidays as $holiday) {
-            $holiday['Weight'] =  0;
-
-            // Price - 4 max
-            // 0 - half more
-            // 1 - quarter more
-            // 2 - around same
-            // 3 - quarter less
-            // 4 - half less
-            $hol_price = $holiday['PricePerNight'];
-            $want_price = $user_want['price'];
-            $price_quarter = $want_price / 4;
-            $price_half = $want_price / 2;
-
-            if ($hol_price >= $want_price + $price_quarter) {
-                // quarter more
-                $holiday['Weight'] = 1;
-            } elseif ($hol_price < $want_price + $price_quarter && $hol_price >= $want_price - $price_quarter) {
-                // around same
-                $holiday['Weight'] = 2;
-            } elseif ($hol_price < $want_price - $price_quarter && $hol_price >= $want_price - $price_half) {
-                // quarter less
-                $holiday['Weight'] = 3;
-            } elseif ($hol_price < $want_price - $price_half) {
-                // half less
-                $holiday['Weight'] = 4;
-            }
-
-
-            // Abroad - 2 max
-            // 0 - is not what user wants
-            // 2 - is what user wants
-            $local = $holiday['Country'] == $user_want['abroad']['country'];
-
-            if ($local == $user_want['abroad']['want']) {
-                // hotel is local and user wants to be local OR
-                // hotel is abroad and user wants to be abroad
-                $holiday['Weight'] =  $holiday['Weight'] + 2;
-            }
-
-            // Location - 2 max
-            // 0 - is not what user wants
-            // 2 - is what user wants
-            if ($holiday['Location'] == $user_want['location']) {
-                $holiday['Weight'] = $holiday['Weight'] + 2;
-            }
-
-
-            // Stars - 2 max
-            // 0 - lower than minimum wanted
-            // 1 - is minimum wanted
-            // 2 - higher than minimum wanted
-            $hol_stars = $holiday['StarRating'];
-            $want_stars = $user_want['stars'];
-
-            if ($want_stars == 5 && $hol_stars == 5) {
-                $holiday['Weight'] = $holiday['Weight'] + 2;
-            }
-
-            if ($hol_stars == $want_stars) {
-                $holiday['Weight'] = $holiday['Weight'] + 1;
-            } elseif ($hol_stars > $want_stars) {
-                $holiday['Weight'] = $holiday['Weight'] + 2;
-            }
-
-            // Activity - 1 max
-            // 1 - is what user wants
-            if ($holiday['Category'] == $user_want['activity']) {
-                $holiday['Weight'] = $holiday['Weight'] + 1;
-            }
-
-            $to_return[] = $holiday;
-        }
-        return $to_return;
-    }
 
     function rankHolidays($holidays) {
         // Rank by weight, then price, then stars
