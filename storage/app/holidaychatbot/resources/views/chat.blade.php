@@ -13,7 +13,7 @@
 <script>
     var botmanWidget = {
         aboutText: 'HolidayBot',
-        introMessage: "Hi! I'm here to help you find your perfect holiday! Say 'hello' to start."
+        introMessage: "Hi! I'm here to help you find your perfect holiday! Say something to start."
     };
 </script>
 
