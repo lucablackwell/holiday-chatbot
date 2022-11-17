@@ -2,14 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Holiday;
-use BotMan\BotMan\BotMan;
-use BotMan\BotMan\BotManFactory;
-use Illuminate\Http\Request;
 use BotMan\BotMan\Messages\Incoming\Answer;
-use BotMan\BotMan\Cache\LaravelCache;
-use BotMan\BotMan\Cache\SymfonyCache;
-use Illuminate\Support\Str;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 class BotManController extends Controller
 {
@@ -22,36 +15,9 @@ class BotManController extends Controller
     public function handle()
     {
         $botman = app('botman');
-
-//        $botman = BotManFactory::create([
-//            'config' => [
-//                'user_cache_time' => 30000,
-//                'conversation_cache_time' => 30000,
-//            ],
-//        ], new LaravelCache());
-//
-//        $adapter = new FilesystemAdapter();
-//        $botman = BotManFactory::create([
-//            'config' => [
-//                'user_cache_time' => 30000,
-//                'conversation_cache_time' => 30000,
-//            ],
-//        ], new SymfonyCache($adapter));
-//
-//        $botman->hears('{message}', function($botman, $message) {
-//            $botman->startConversation(new HolidayConversation);
-//        });
-
         $botman->hears('{message}', function($botman, $message) {
             $this->conversation($botman);
         });
-//        $botman->ask('Hello! What is your name?', function(Answer $answer) {
-//
-//            $this->user_name = $answer->getText();
-//            $this->reply('It\'s lovely to meet you, ' . $this->user_name . '. Let\'s find you a holiday!');
-//
-//            //$this->askCountry($this);
-//        });
         $botman->listen();
 
     }
@@ -87,7 +53,31 @@ class BotManController extends Controller
                                     $this->user_want['location'] = $answer->getText();
                                     $botman->ask('Thank you. How many stars would you like your destination to have (minimum)?', function(Answer $answer, $botman) {
                                         // stars
-                                        $this->user_want['stars'] = $answer->getText();
+                                        switch (strtolower($answer->getText())) {
+                                            case 1:
+                                            case 'one':
+                                                $this->user_want['stars'] = 1;
+                                                break;
+                                            case 2:
+                                            case 'two':
+                                                $this->user_want['stars'] = 2;
+                                                break;
+                                            case 3:
+                                            case 'three':
+                                                $this->user_want['stars'] = 3;
+                                                break;
+                                            case 4:
+                                            case 'four':
+                                                $this->user_want['stars'] = 4;
+                                                break;
+                                            case 5:
+                                            case 'five':
+                                                $this->user_want['stars'] = 5;
+                                                break;
+                                            default:
+                                                $botman->say('Invalid. Please start again.');
+                                                break;
+                                        }
                                         $botman->ask('Thank you. What\'s your ideal temperature? (cold/mild/hot)?', function(Answer $answer, $botman) {
                                             // temperature
                                             if (!in_array($answer->getText(), ['cold', 'mild', 'hot'])) {
@@ -231,7 +221,6 @@ class BotManController extends Controller
                                                                     return $hol2['Weight'] <=> $hol1['Weight'];
                                                                 }
                                                             });
-
 
                                                             // show top 5
                                                             for ($holiday = 0; $holiday < 5; $holiday++) {
