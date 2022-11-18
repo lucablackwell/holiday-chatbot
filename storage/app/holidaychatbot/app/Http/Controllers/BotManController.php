@@ -168,9 +168,7 @@ class BotManController extends Controller
                                                                 // Abroad - 2 max
                                                                 // 0 - is not what user wants
                                                                 // 2 - is what user wants
-                                                                $local = $this->holidays[$holiday]['Country'] == $this->user_want['abroad']['country'];
-
-                                                                if ($local == $this->user_want['abroad']['want']) {
+                                                                if (($this->holidays[$holiday]['Country'] == $this->user_want['abroad']['country']) == $this->user_want['abroad']['want']) {
                                                                     // hotel is local and user wants to be local OR
                                                                     // hotel is abroad and user wants to be abroad
                                                                     $this->holidays[$holiday]['Weight'] =  $this->holidays[$holiday]['Weight'] + 2;
