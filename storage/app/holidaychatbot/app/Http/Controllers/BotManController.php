@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Holiday;
@@ -15,7 +16,7 @@ class BotManController extends Controller
     public function handle()
     {
         $botman = app('botman');
-        $botman->hears('{message}', function($botman, $message) {
+        $botman->hears('{message}', function ($botman, $message) {
             $this->conversation($botman);
         });
         $botman->listen();
@@ -27,11 +28,11 @@ class BotManController extends Controller
      */
     public function conversation($botman)
     {
-        $botman->ask('Hello! What is your name?', function(Answer $answer, $botman) {
+        $botman->ask('Hello! What is your name?', function (Answer $answer, $botman) {
             $botman->user_name = $answer->getText();
             $botman->say('It\'s lovely to meet you, ' . $this->user_name . '. Let\'s find you a holiday!');
 
-            $botman->ask('What country do you live in, ' . $this->user_name . '?', function(Answer $answer, $botman) {
+            $botman->ask('What country do you live in, ' . $this->user_name . '?', function (Answer $answer, $botman) {
                 $this->user_want['abroad']['country'] = strtoupper($answer->getText());
                 $countries = ['AFGHANISTAN', 'AlASKA', 'ALBANIA', 'ALGERIA', 'ANDORRA', 'ANGOLA', 'ANTIGUA & DEPS', 'ARGENTINA', 'ARMENIA', 'AUSTRALIA', 'AUSTRIA', 'AZERBAIJAN', 'BAHAMAS', 'THE BAHAMAS', 'BAHRAIN', 'BANGLADESH', 'BARBADOS', 'BELARUS', 'BELGIUM', 'BELIZE', 'BENIN', 'BHUTAN', 'BOLIVIA', 'BOSNIA HERZEGOVINA', 'BOTSWANA', 'BRAZIL', 'BRUNEI', 'BULGARIA', 'BURKINA', 'BURUNDI', 'CAMBODIA', 'CAMEROON', 'CANADA', 'CAPE VERDE', 'CENTRAL AFRICAN REP', 'CHAD', 'CHILE', 'CHINA', 'COLOMBIA', 'COMOROS', 'CONGO', 'THE CONGO', 'COSTA RICA', 'CROATIA', 'CUBA', 'CYPRUS', 'CZECH REPUBLIC', 'DENMARK', 'DJIBOUTI', 'DOMINICA', 'DOMINICAN REPUBLIC', 'EAST TIMOR', 'ECUADOR', 'EGYPT', 'EL SALVADOR', 'EQUATORIAL GUINEA', 'ERITREA', 'ESTONIA', 'ETHIOPIA', 'FIJI', 'FINLAND', 'FRANCE', 'FRENCH POLYNESIA', 'GABON', 'GAMBIA', 'GEORGIA', 'GERMANY', 'GHANA', 'GREECE', 'GRENADA', 'GUATEMALA', 'GUINEA', 'GUINEA-BISSAU', 'GUYANA', 'HAITI', 'HONDURAS', 'HUNGARY', 'ICELAND', 'INDIA', 'INDONESIA', 'IRAN', 'IRAQ', 'IRELAND', 'ISRAEL', 'ITALY', 'IVORY COAST', 'IVORY COAST', 'JAMAICA', 'JAPAN', 'JORDAN', 'KAZAKHSTAN', 'KENYA', 'KIRIBATI', 'NORTH KOREA NORTH', 'SOUTH KOREA', 'KOSOVO', 'KUWAIT', 'KYRGYZSTAN', 'LAOS', 'LATVIA', 'LEBANON', 'LESOTHO', 'LIBERIA', 'LIBYA', 'LIECHTENSTEIN', 'LITHUANIA', 'LUXEMBOURG', 'MACEDONIA', 'MADAGASCAR', 'MALAWI', 'MALAYSIA', 'MALDIVES', 'MALI', 'MALTA', 'MARSHALL ISLANDS', 'MAURITANIA', 'MAURITIUS', 'MEXICO', 'MICRONESIA', 'MOLDOVA', 'MONACO', 'MONGOLIA', 'MONTENEGRO', 'MOROCCO', 'MOZAMBIQUE', 'MYANMAR', 'NAMIBIA', 'NAURU', 'NEPAL', 'NETHERLANDS', 'NEW ZEALAND', 'NICARAGUA', 'NIGER', 'NIGERIA', 'NORWAY', 'OMAN', 'PAKISTAN', 'PALAU', 'PANAMA', 'PAPUA NEW GUINEA', 'PARAGUAY', 'PERU', 'PHILIPPINES', 'THE PHILIPPINES', 'POLAND', 'PORTUGAL', 'QATAR', 'ROMANIA', 'RUSSIAN FEDERATION', 'RUSSIA', 'RWANDA', 'ST KITTS & NEVIS', 'ST LUCIA', 'SAINT VINCENT & THE GRENADINES', 'SAMOA', 'SAN MARINO', 'SAO TOME & PRINCIPE', 'SAUDI ARABIA', 'SENEGAL', 'SERBIA', 'SEYCHELLES', 'SIERRA LEONE', 'SINGAPORE', 'SLOVAKIA', 'SLOVENIA', 'SOLOMON ISLANDS', 'SOMALIA', 'SOUTH AFRICA', 'SOUTH SUDAN', 'SPAIN', 'SRI LANKA', 'SUDAN', 'SURINAME', 'SWAZILAND', 'SWEDEN', 'SWITZERLAND', 'SYRIA', 'TAIWAN', 'TAJIKISTAN', 'TANZANIA', 'THAILAND', 'TOGO', 'TONGA', 'TRINIDAD & TOBAGO', 'TUNISIA', 'TURKEY', 'TURKMENISTAN', 'TUVALU', 'UGANDA', 'UKRAINE', 'UNITED ARAB EMIRATES', 'UAE', 'UNITED KINGDOM', 'UK', 'UNITED STATES', 'UNITED STATES OF AMERICA', 'USA', 'URUGUAY', 'UZBEKISTAN', 'VANUATU', 'VATICAN CITY', 'VENEZUELA', 'VIETNAM', 'YEMEN', 'ZAMBIA', 'ZIMBABWE'];
 
@@ -39,19 +40,19 @@ class BotManController extends Controller
                     $botman->say('I\'m sorry, but I don\'t know that country. Please check your spelling or choose the one closest, refresh and enter it again.');
                 } else {
                     // abroad
-                    $botman->ask('Thank you. Do you want to go abroad? (y\n)', function(Answer $answer, $botman) {
+                    $botman->ask('Thank you. Do you want to go abroad? (y\n)', function (Answer $answer, $botman) {
                         $this->user_want['abroad']['want'] = ($answer->getText()[0] == 'y');
                         // price
-                        $botman->ask('Thank you. What\'s your ideal price for one night?', function(Answer $answer, $botman) {
+                        $botman->ask('Thank you. What\'s your ideal price for one night?', function (Answer $answer, $botman) {
                             $this->user_want['price'] = $answer->getText();
                             // location
-                            $botman->ask('Thank you. What\'s your ideal location? (sea/city/mountain)', function(Answer $answer, $botman) {
+                            $botman->ask('Thank you. What\'s your ideal location? (sea/city/mountain)', function (Answer $answer, $botman) {
                                 // location
                                 if (!in_array($answer->getText(), ['sea', 'city', 'mountain'])) {
                                     $botman->say('Invalid. Please start again.');
                                 } else {
                                     $this->user_want['location'] = $answer->getText();
-                                    $botman->ask('Thank you. How many stars would you like your destination to have (minimum)?', function(Answer $answer, $botman) {
+                                    $botman->ask('Thank you. How many stars would you like your destination to have (minimum)?', function (Answer $answer, $botman) {
                                         // stars
                                         switch (strtolower($answer->getText())) {
                                             case 1:
@@ -78,7 +79,7 @@ class BotManController extends Controller
                                                 $botman->say('Invalid. Please start again.');
                                                 break;
                                         }
-                                        $botman->ask('Thank you. What\'s your ideal temperature? (cold/mild/hot)?', function(Answer $answer, $botman) {
+                                        $botman->ask('Thank you. What\'s your ideal temperature? (cold/mild/hot)?', function (Answer $answer, $botman) {
                                             // temperature
                                             if (!in_array($answer->getText(), ['cold', 'mild', 'hot'])) {
                                                 $botman->say('Invalid. Please start again.');
@@ -103,7 +104,7 @@ class BotManController extends Controller
                                                                 $location_to_say = 'on a mountain';
                                                                 break;
                                                         }
-                                                        $activity_to_say = (in_array(strtolower(substr($this->user_want['activity'], 0, 1)), ['a', 'e' ,'i', 'o', 'u']) ? 'an ' : 'a ') . $this->user_want['activity'];
+                                                        $activity_to_say = (in_array(strtolower(substr($this->user_want['activity'], 0, 1)), ['a', 'e', 'i', 'o', 'u']) ? 'an ' : 'a ') . $this->user_want['activity'];
                                                         if ($this->user_want['abroad']['want']) {
                                                             $abroad_to_say = 'somewhere abroad';
                                                         } else {
@@ -134,11 +135,11 @@ class BotManController extends Controller
                                                             $this->user_want['price'] . ' a night.'
                                                         );
 
-                                                        $botman->ask('Say something to see your results.', function(Answer $answer, $botman) {
+                                                        $botman->ask('Say something to see your results.', function (Answer $answer, $botman) {
                                                             // weight holidays
                                                             $this->holidays = Holiday::all()->toArray();
                                                             for ($holiday = 0; $holiday < count($this->holidays); $holiday++) {
-                                                                $this->holidays[$holiday]['Weight'] =  0;
+                                                                $this->holidays[$holiday]['Weight'] = 0;
 
                                                                 // Price - 4 max
                                                                 // 0 - half more
@@ -171,7 +172,7 @@ class BotManController extends Controller
                                                                 if (($this->holidays[$holiday]['Country'] == $this->user_want['abroad']['country']) == $this->user_want['abroad']['want']) {
                                                                     // hotel is local and user wants to be local OR
                                                                     // hotel is abroad and user wants to be abroad
-                                                                    $this->holidays[$holiday]['Weight'] =  $this->holidays[$holiday]['Weight'] + 2;
+                                                                    $this->holidays[$holiday]['Weight'] = $this->holidays[$holiday]['Weight'] + 2;
                                                                 }
 
                                                                 // Location - 2 max
